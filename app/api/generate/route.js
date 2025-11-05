@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server';
 import { callLLM } from '@/lib/llm-client';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '@/lib/prompts';
+import { decryptConfig } from '@/lib/crypto-utils';
+
+/**
+ * Get environment variable configuration on the server side
+ */
+function getServerEnvConfig() {
+  const type = process.env.NEXT_PUBLIC_LLM_TYPE || process.env.LLM_TYPE;
+  const baseUrl = process.env.NEXT_PUBLIC_LLM_BASE_URL || process.env.LLM_BASE_URL;
+  const apiKey = process.env.NEXT_PUBLIC_LLM_API_KEY || process.env.LLM_API_KEY;
+  const model = process.env.NEXT_PUBLIC_LLM_MODEL || process.env.LLM_MODEL;
+
+  if (type && baseUrl && apiKey && model) {
+    console.log('[Server] Using environment variable configuration:', {
+      name: '环境变量配置',
+      type,
+      baseUrl: baseUrl.substring(0, 20) + '...',
+      model
+    });
+    return {
+      name: '环境变量配置',
+      type,
+      baseUrl,
+      apiKey,
+      model
+    };
+  }
+
+  return null;
+}
 
 /**
  * POST /api/generate
@@ -8,11 +37,38 @@ import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '@/lib/prompts';
  */
 export async function POST(request) {
   try {
-    const { config, userInput, chartType } = await request.json();
+    const { config: encryptedClientConfig, userInput, chartType, useEnvConfig } = await request.json();
 
-    if (!config || !userInput) {
+    if (!userInput) {
       return NextResponse.json(
-        { error: 'Missing required parameters: config, userInput' },
+        { error: 'Missing required parameter: userInput' },
+        { status: 400 }
+      );
+    }
+
+    // Decrypt client config if provided
+    const clientConfig = encryptedClientConfig ? decryptConfig(encryptedClientConfig) : null;
+
+    // Determine which config to use based on user preference
+    let config;
+    const envConfig = getServerEnvConfig();
+
+    if (useEnvConfig && envConfig) {
+      // User prefers environment config and it's available
+      config = envConfig;
+      console.log('[Server] Using environment configuration (user preference)');
+    } else if (clientConfig) {
+      // Use client config (now decrypted)
+      config = clientConfig;
+      console.log('[Server] Using client configuration (user preference, decrypted)');
+    } else if (envConfig) {
+      // Fallback to env config if available
+      config = envConfig;
+      console.log('[Server] Using environment configuration (fallback)');
+    } else {
+      // No config available
+      return NextResponse.json(
+        { error: 'No LLM configuration available. Please configure environment variables or provide client config.' },
         { status: 400 }
       );
     }

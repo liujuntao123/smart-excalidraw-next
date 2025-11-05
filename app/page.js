@@ -5,10 +5,10 @@ import dynamic from 'next/dynamic';
 import Chat from '@/components/Chat';
 import CodeEditor from '@/components/CodeEditor';
 import ConfigManager from '@/components/ConfigManager';
-import ContactModal from '@/components/ContactModal';
 import Notification from '@/components/Notification';
 import { getConfig, isConfigValid } from '@/lib/config';
 import { optimizeExcalidrawCode } from '@/lib/optimizeArrows';
+import { encryptConfig } from '@/lib/crypto-utils';
 
 // Dynamically import ExcalidrawCanvas to avoid SSR issues
 const ExcalidrawCanvas = dynamic(() => import('@/components/ExcalidrawCanvas'), {
@@ -17,8 +17,10 @@ const ExcalidrawCanvas = dynamic(() => import('@/components/ExcalidrawCanvas'), 
 
 export default function Home() {
   const [config, setConfig] = useState(null);
+  const [hasEnvConfig, setHasEnvConfig] = useState(false); // Track if env config is available
+  const [envConfigInfo, setEnvConfigInfo] = useState(null); // Store env config info for display
+  const [useEnvConfig, setUseEnvConfig] = useState(true); // User preference: use env config or client config
   const [isConfigManagerOpen, setIsConfigManagerOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [elements, setElements] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -35,8 +37,29 @@ export default function Home() {
     type: 'info'
   });
 
-  // Load config on mount and listen for config changes
+  // Check environment config on mount
   useEffect(() => {
+    const checkEnvConfig = async () => {
+      try {
+        const response = await fetch('/api/config/check');
+        if (response.ok) {
+          const data = await response.json();
+          setHasEnvConfig(data.hasEnvConfig);
+          if (data.hasEnvConfig) {
+            setEnvConfigInfo(data.config);
+            console.log('[Client] Environment configuration detected:', data.config);
+          } else {
+            console.log('[Client] No environment configuration, will use localStorage config');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check environment config:', error);
+      }
+    };
+
+    checkEnvConfig();
+
+    // Also load localStorage config
     const savedConfig = getConfig();
     if (savedConfig) {
       setConfig(savedConfig);
@@ -135,7 +158,12 @@ export default function Home() {
 
   // Handle sending a message (single-turn)
   const handleSendMessage = async (userMessage, chartType = 'auto') => {
-    if (!isConfigValid(config)) {
+    // Determine which config to use based on user preference
+    const shouldUseEnvConfig = hasEnvConfig && useEnvConfig;
+    const shouldUseClientConfig = !shouldUseEnvConfig;
+
+    // Validate: if user prefers client config but it's not valid, show warning
+    if (shouldUseClientConfig && !isConfigValid(config)) {
       setNotification({
         isOpen: true,
         title: '配置提醒',
@@ -146,19 +174,42 @@ export default function Home() {
       return;
     }
 
+    // If user prefers env config but it's not available, and client config is also invalid
+    if (useEnvConfig && !hasEnvConfig && !isConfigValid(config)) {
+      setNotification({
+        isOpen: true,
+        title: '配置提醒',
+        message: '环境变量未配置，请配置您的 LLM 提供商',
+        type: 'warning'
+      });
+      setIsConfigManagerOpen(true);
+      return;
+    }
+
+    // Log which config we're using
+    if (shouldUseEnvConfig) {
+      console.log('[Client] User chose to use environment configuration');
+    } else {
+      console.log('[Client] User chose to use localStorage configuration');
+    }
+
     setIsGenerating(true);
     setApiError(null); // Clear previous errors
     setJsonError(null); // Clear previous JSON errors
 
     try {
+      // Encrypt client config before sending to server
+      const encryptedConfig = shouldUseClientConfig && config ? encryptConfig(config) : null;
+
       // Call generate API with streaming
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          config,
+          config: encryptedConfig, // Send encrypted config
           userInput: userMessage,
           chartType,
+          useEnvConfig: shouldUseEnvConfig, // Tell server user's preference
         }),
       });
 
@@ -370,7 +421,16 @@ export default function Home() {
           <p className="text-xs text-gray-500">AI 驱动的图表生成</p>
         </div>
         <div className="flex items-center space-x-3">
-          {config && isConfigValid(config) && (
+          {/* Show current active config */}
+          {hasEnvConfig && useEnvConfig && envConfigInfo && (
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 rounded border border-blue-300">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-xs text-blue-900 font-medium">
+                环境变量 - {envConfigInfo.type} - {envConfigInfo.model}
+              </span>
+            </div>
+          )}
+          {(!useEnvConfig || !hasEnvConfig) && config && isConfigValid(config) && (
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-50 rounded border border-green-300">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-xs text-green-900 font-medium">
@@ -378,6 +438,20 @@ export default function Home() {
               </span>
             </div>
           )}
+
+          {/* Show config switcher if both env and client config are available */}
+          {hasEnvConfig && config && isConfigValid(config) && (
+            <select
+              value={useEnvConfig ? 'env' : 'client'}
+              onChange={(e) => setUseEnvConfig(e.target.value === 'env')}
+              className="px-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white text-gray-900"
+              disabled={isGenerating}
+            >
+              <option value="env">使用环境变量配置</option>
+              <option value="client">使用自定义配置</option>
+            </select>
+          )}
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsConfigManagerOpen(true)}
@@ -468,7 +542,7 @@ export default function Home() {
           <span>AI 驱动的智能图表生成工具</span>
           <span className="text-gray-400">|</span>
           <a
-            href="https://github.com/liujuntao123/smart-excalidraw-next"
+            href="https://github.com/innocentshen/smart-excalidraw-next"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
@@ -478,24 +552,8 @@ export default function Home() {
             </svg>
             <span>GitHub</span>
           </a>
-          <span className="text-gray-400">|</span>
-          <button
-            onClick={() => setIsContactModalOpen(true)}
-            className="flex items-center space-x-1 hover:text-gray-900 transition-colors text-blue-600 hover:text-blue-700"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span>联系作者</span>
-          </button>
         </div>
       </footer>
-
-      {/* Contact Modal */}
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-      />
 
       {/* Notification */}
       <Notification

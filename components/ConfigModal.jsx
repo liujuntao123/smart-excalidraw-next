@@ -130,7 +130,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
               value={config.name}
               onChange={(e) => setConfig({ ...config, name: e.target.value })}
               placeholder="例如：我的 OpenAI"
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -142,7 +142,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
             <select
               value={config.type}
               onChange={(e) => setConfig({ ...config, type: e.target.value, model: '' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             >
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
@@ -159,7 +159,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
               value={config.baseUrl}
               onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
               placeholder={config.type === 'openai' ? 'https://api.openai.com/v1' : 'https://api.anthropic.com/v1'}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
               value={config.apiKey}
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
               placeholder="sk-..."
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -232,7 +232,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
               <select
                 value={config.model}
                 onChange={(e) => setConfig({ ...config, model: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
               >
                 {models.map((model) => (
                   <option key={model.id} value={model.id}>
@@ -249,7 +249,7 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
                 value={config.model}
                 onChange={(e) => setConfig({ ...config, model: e.target.value })}
                 placeholder="例如：gpt-4、claude-3-opus-20240229"
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
               />
             )}
           </div>
