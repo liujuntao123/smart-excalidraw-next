@@ -232,7 +232,7 @@ export default function Chat({ onSendMessage, isGenerating }) {
                   id="chart-type-text"
                   value={chartType}
                   onChange={(e) => setChartType(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900"
                   disabled={isGenerating}
                 >
                   {Object.entries(CHART_TYPES).map(([key, label]) => (
@@ -294,7 +294,7 @@ export default function Chat({ onSendMessage, isGenerating }) {
                 id="chart-type-file"
                 value={chartType}
                 onChange={(e) => setChartType(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900"
                 disabled={isGenerating || fileStatus === 'parsing'}
               >
                 {Object.entries(CHART_TYPES).map(([key, label]) => (
