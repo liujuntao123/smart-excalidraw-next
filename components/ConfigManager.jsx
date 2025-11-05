@@ -285,7 +285,7 @@ export default function ConfigManager({ isOpen, onClose, onConfigSelect }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索配置..."
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -492,7 +492,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="例如：我的 OpenAI"
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -505,7 +505,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="配置描述（可选）"
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -516,7 +516,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value, model: '' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             >
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
@@ -532,7 +532,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
               value={formData.baseUrl}
               onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
               placeholder={formData.type === 'openai' ? 'https://api.openai.com/v1' : 'https://api.anthropic.com/v1'}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -545,7 +545,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
               value={formData.apiKey}
               onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
               placeholder="sk-..."
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
             />
           </div>
 
@@ -599,7 +599,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
               <select
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
               >
                 {models.map((model) => (
                   <option key={model.id} value={model.id}>
@@ -615,7 +615,7 @@ function ConfigEditor({ config, isCreating, onSave, onCancel }) {
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                 placeholder="例如：gpt-4、claude-3-opus-20240229"
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 bg-gray-50 text-gray-900 placeholder-gray-500"
               />
             )}
           </div>
