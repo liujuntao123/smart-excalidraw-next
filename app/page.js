@@ -17,6 +17,8 @@ const ExcalidrawCanvas = dynamic(() => import('@/components/ExcalidrawCanvas'), 
 
 export default function Home() {
   const [config, setConfig] = useState(null);
+  const [hasEnvConfig, setHasEnvConfig] = useState(false); // Track if env config is available
+  const [envConfigInfo, setEnvConfigInfo] = useState(null); // Store env config info for display
   const [isConfigManagerOpen, setIsConfigManagerOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
@@ -35,8 +37,29 @@ export default function Home() {
     type: 'info'
   });
 
-  // Load config on mount and listen for config changes
+  // Check environment config on mount
   useEffect(() => {
+    const checkEnvConfig = async () => {
+      try {
+        const response = await fetch('/api/config/check');
+        if (response.ok) {
+          const data = await response.json();
+          setHasEnvConfig(data.hasEnvConfig);
+          if (data.hasEnvConfig) {
+            setEnvConfigInfo(data.config);
+            console.log('[Client] Environment configuration detected:', data.config);
+          } else {
+            console.log('[Client] No environment configuration, will use localStorage config');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check environment config:', error);
+      }
+    };
+
+    checkEnvConfig();
+
+    // Also load localStorage config
     const savedConfig = getConfig();
     if (savedConfig) {
       setConfig(savedConfig);
@@ -135,7 +158,9 @@ export default function Home() {
 
   // Handle sending a message (single-turn)
   const handleSendMessage = async (userMessage, chartType = 'auto') => {
-    if (!isConfigValid(config)) {
+    // If environment config is available, we can proceed without client config
+    // Otherwise, check if client config is valid
+    if (!hasEnvConfig && !isConfigValid(config)) {
       setNotification({
         isOpen: true,
         title: '配置提醒',
@@ -144,6 +169,13 @@ export default function Home() {
       });
       setIsConfigManagerOpen(true);
       return;
+    }
+
+    // Log which config we're using
+    if (hasEnvConfig) {
+      console.log('[Client] Using environment configuration for generation');
+    } else {
+      console.log('[Client] Using localStorage configuration for generation');
     }
 
     setIsGenerating(true);
@@ -370,7 +402,17 @@ export default function Home() {
           <p className="text-xs text-gray-500">AI 驱动的图表生成</p>
         </div>
         <div className="flex items-center space-x-3">
-          {config && isConfigValid(config) && (
+          {/* Show environment config if available */}
+          {hasEnvConfig && envConfigInfo && (
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 rounded border border-blue-300">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-xs text-blue-900 font-medium">
+                环境变量 - {envConfigInfo.type} - {envConfigInfo.model}
+              </span>
+            </div>
+          )}
+          {/* Show client config if no env config and client config is valid */}
+          {!hasEnvConfig && config && isConfigValid(config) && (
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-50 rounded border border-green-300">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-xs text-green-900 font-medium">
