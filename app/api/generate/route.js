@@ -9,8 +9,38 @@ import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '@/lib/prompts';
 export async function POST(request) {
   try {
     const { config, userInput, chartType } = await request.json();
+    const accessPassword = request.headers.get('x-access-password');
 
-    if (!config || !userInput) {
+    // Check if using server-side config with access password
+    let finalConfig = config;
+    if (accessPassword) {
+      const envPassword = process.env.ACCESS_PASSWORD;
+      if (!envPassword) {
+        return NextResponse.json(
+          { error: '服务器未配置访问密码' },
+          { status: 400 }
+        );
+      }
+      if (accessPassword !== envPassword) {
+        return NextResponse.json(
+          { error: '访问密码错误' },
+          { status: 401 }
+        );
+      }
+      // Use server-side config
+      finalConfig = {
+        type: process.env.SERVER_LLM_TYPE,
+        baseUrl: process.env.SERVER_LLM_BASE_URL,
+        apiKey: process.env.SERVER_LLM_API_KEY,
+        model: process.env.SERVER_LLM_MODEL,
+      };
+      if (!finalConfig.type || !finalConfig.apiKey) {
+        return NextResponse.json(
+          { error: '服务器LLM配置不完整' },
+          { status: 500 }
+        );
+      }
+    } else if (!config || !userInput) {
       return NextResponse.json(
         { error: 'Missing required parameters: config, userInput' },
         { status: 400 }
@@ -50,7 +80,7 @@ export async function POST(request) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          await callLLM(config, fullMessages, (chunk) => {
+          await callLLM(finalConfig, fullMessages, (chunk) => {
             // Send each chunk as SSE
             const data = `data: ${JSON.stringify({ content: chunk })}\n\n`;
             controller.enqueue(encoder.encode(data));

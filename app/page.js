@@ -7,6 +7,7 @@ import CodeEditor from '@/components/CodeEditor';
 import ConfigManager from '@/components/ConfigManager';
 import ContactModal from '@/components/ContactModal';
 import HistoryModal from '@/components/HistoryModal';
+import AccessPasswordModal from '@/components/AccessPasswordModal';
 import Notification from '@/components/Notification';
 import { getConfig, isConfigValid } from '@/lib/config';
 import { optimizeExcalidrawCode } from '@/lib/optimizeArrows';
@@ -22,6 +23,7 @@ export default function Home() {
   const [isConfigManagerOpen, setIsConfigManagerOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isAccessPasswordModalOpen, setIsAccessPasswordModalOpen] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [elements, setElements] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -33,6 +35,7 @@ export default function Home() {
   const [jsonError, setJsonError] = useState(null);
   const [currentInput, setCurrentInput] = useState('');
   const [currentChartType, setCurrentChartType] = useState('auto');
+  const [usePassword, setUsePassword] = useState(false);
   const [notification, setNotification] = useState({
     isOpen: false,
     title: '',
@@ -47,16 +50,34 @@ export default function Home() {
       setConfig(savedConfig);
     }
 
+    // Load password access state
+    const passwordEnabled = localStorage.getItem('smart-excalidraw-use-password') === 'true';
+    setUsePassword(passwordEnabled);
+
     // Listen for storage changes to sync across tabs
     const handleStorageChange = (e) => {
       if (e.key === 'smart-excalidraw-active-config' || e.key === 'smart-excalidraw-configs') {
         const newConfig = getConfig();
         setConfig(newConfig);
       }
+      if (e.key === 'smart-excalidraw-use-password') {
+        const passwordEnabled = localStorage.getItem('smart-excalidraw-use-password') === 'true';
+        setUsePassword(passwordEnabled);
+      }
+    };
+
+    // Listen for custom event from AccessPasswordModal (same tab)
+    const handlePasswordSettingsChanged = (e) => {
+      setUsePassword(e.detail.usePassword);
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('password-settings-changed', handlePasswordSettingsChanged);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('password-settings-changed', handlePasswordSettingsChanged);
+    };
   }, []);
 
   // Post-process Excalidraw code: remove markdown wrappers and fix unescaped quotes
@@ -140,11 +161,14 @@ export default function Home() {
 
   // Handle sending a message (single-turn)
   const handleSendMessage = async (userMessage, chartType = 'auto') => {
-    if (!isConfigValid(config)) {
+    const usePassword = typeof window !== 'undefined' && localStorage.getItem('smart-excalidraw-use-password') === 'true';
+    const accessPassword = typeof window !== 'undefined' ? localStorage.getItem('smart-excalidraw-access-password') : '';
+
+    if (!usePassword && !isConfigValid(config)) {
       setNotification({
         isOpen: true,
         title: '配置提醒',
-        message: '请先配置您的 LLM 提供商',
+        message: '请先配置您的 LLM 提供商或启用访问密码',
         type: 'warning'
       });
       setIsConfigManagerOpen(true);
@@ -158,12 +182,17 @@ export default function Home() {
     setJsonError(null); // Clear previous JSON errors
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (usePassword && accessPassword) {
+        headers['x-access-password'] = accessPassword;
+      }
+
       // Call generate API with streaming
       const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          config,
+          config: usePassword ? null : config,
           userInput: userMessage,
           chartType,
         }),
@@ -398,11 +427,11 @@ export default function Home() {
           <p className="text-xs text-gray-500">AI 驱动的图表生成</p>
         </div>
         <div className="flex items-center space-x-3">
-          {config && isConfigValid(config) && (
+          {(usePassword || (config && isConfigValid(config))) && (
             <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-50 rounded border border-green-300">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-xs text-green-900 font-medium">
-                {config.name || config.type} - {config.model}
+                {usePassword ? '密码访问' : `${config.name || config.type} - ${config.model}`}
               </span>
             </div>
           )}
@@ -412,6 +441,12 @@ export default function Home() {
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors duration-200"
             >
               历史记录
+            </button>
+            <button
+              onClick={() => setIsAccessPasswordModalOpen(true)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors duration-200"
+            >
+              访问密码
             </button>
             <button
               onClick={() => setIsConfigManagerOpen(true)}
@@ -535,6 +570,12 @@ export default function Home() {
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
         onApply={handleApplyHistory}
+      />
+
+      {/* Access Password Modal */}
+      <AccessPasswordModal
+        isOpen={isAccessPasswordModalOpen}
+        onClose={() => setIsAccessPasswordModalOpen(false)}
       />
 
       {/* Contact Modal */}

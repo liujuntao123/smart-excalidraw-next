@@ -120,6 +120,10 @@ export default function ConfigModal({ isOpen, onClose, onSave, initialConfig, sh
             </div>
           )}
 
+          <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded">
+            <p className="text-sm text-blue-800">提示：如果启用了访问密码，将优先使用服务器端配置</p>
+          </div>
+
           {/* Provider Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

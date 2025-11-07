@@ -256,6 +256,10 @@ export default function ConfigManager({ isOpen, onClose, onConfigSelect }) {
             </div>
           )}
 
+          <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded">
+            <p className="text-sm text-blue-800">提示：如果启用了访问密码，将优先使用服务器端配置，此处配置将被忽略</p>
+          </div>
+
           {/* Actions Bar */}
           <div className="mb-6 flex flex-wrap gap-2">
             <button
