@@ -1,0 +1,19 @@
+services:
+  smart-excalidraw-next:
+    container_name: smart-excalidraw-next
+    build:
+      context: .
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      # 访问密码（用户需要输入此密码才能使用服务器端 LLM）
+      -  ACCESS_PASSWORD=your-secure-password
+      # LLM 提供商类型（openai 或 anthropic）
+      -  SERVER_LLM_TYPE=anthropic
+      # API 基础 URL
+      -  SERVER_LLM_BASE_URL=https://api.anthropic.com/v1
+      # API 密钥
+      -  SERVER_LLM_API_KEY=sk-ant-your-key-here
+      # 模型名称
+      -  SERVER_LLM_MODEL=claude-sonnet-4-5-20250929
