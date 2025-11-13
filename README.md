@@ -91,6 +91,16 @@ pnpm dev
 
 访问 http://localhost:3000 即可使用。
 
+## Docker compose 部署
+```bash
+# 克隆项目
+git clone <your-repo-url>
+cd smart-excalidraw-next
+#启动项目
+docker compose up -d
+```
+访问 http://localhost:3000 即可使用。
+
 ### 配置服务器端 LLM（可选）
 
 如果你想为用户提供统一的 LLM 配置，避免他们自己申请 API Key，可以配置服务器端访问密码功能：
