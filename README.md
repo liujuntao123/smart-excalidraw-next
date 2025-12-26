@@ -2,13 +2,13 @@
 > **用自然语言，绘制专业图表**
 
 
-🚀🚀🚀全面升级的新版本，更强大好用的绘图工具
+🚀🚀🚀全面升级的新版本，更强大好用的绘图平台
 
-https://smart-draw.aizhi.site
+https://ai-draw-nexus.aizhi.site
 
 🚀🚀🚀新版本github地址：
 
-https://github.com/liujuntao123/smart-draw
+https://github.com/liujuntao123/ai-draw-nexus
 
 
 一图介绍
