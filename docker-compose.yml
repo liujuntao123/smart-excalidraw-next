@@ -1,0 +1,61 @@
+services:
+  smart-excalidraw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-excalidraw-app
+    restart: unless-stopped
+    ports:
+      - "30055:30055"
+    environment:
+      # 应用环境变量
+      - NODE_ENV=production
+      - PORT=30055
+      
+      # 服务器端 LLM 配置（可选）
+      # 如果要使用服务器端 LLM，取消注释并配置以下变量
+      # - ACCESS_PASSWORD=your-secure-password
+      # - SERVER_LLM_TYPE=anthropic  # 或 openai
+      # - SERVER_LLM_BASE_URL=https://api.anthropic.com/v1
+      # - SERVER_LLM_API_KEY=sk-ant-your-key-here
+      # - SERVER_LLM_MODEL=claude-sonnet-4-5-20250929
+      
+      # 性能优化
+      - NODE_OPTIONS=--max-old-space-size=4096
+    volumes:
+      []
+    networks:
+      - smart-excalidraw-network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:30055/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 可选：使用 nginx 作为反向代理
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: smart-excalidraw-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - smart-excalidraw
+  #   networks:
+  #     - smart-excalidraw-network
+
+networks:
+  smart-excalidraw-network:
+    driver: bridge
+
+# 可选：数据卷配置（如果需要持久化数据）
+# volumes:
+#   logs:
+#   uploads:
