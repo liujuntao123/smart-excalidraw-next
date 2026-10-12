@@ -8,12 +8,10 @@ https://ai-draw-nexus.aizhi.site
 
 
 
-
-一图介绍
 ![generated-image-1766739999192](https://github.com/user-attachments/assets/6438a45f-1eba-4b63-a4fa-50cd45b718fc)
 
 
-![generated-image-1766740104116](https://github.com/user-attachments/assets/f94e0702-6442-40f7-8b4a-ff4aabe68d5b)
+
 
 
 ## English Version
