@@ -25,7 +25,6 @@ export default function Home() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isAccessPasswordModalOpen, setIsAccessPasswordModalOpen] = useState(false);
-  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(true);
   const [generatedCode, setGeneratedCode] = useState('');
   const [elements, setElements] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -606,37 +605,6 @@ export default function Home() {
         type={notification.type}
       />
 
-      {/* Announcement Modal */}
-      {isAnnouncementModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="px-6 py-4 bg-blue-600">
-              <h2 className="text-xl font-semibold text-white">公告</h2>
-            </div>
-            <div className="px-6 py-6">
-              <p className="text-gray-700 text-base leading-relaxed">
-                本网站将迁移至更全面强大的新版本：
-                <a
-                  href="https://ai-draw-nexus.aizhi.site/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-medium underline ml-1"
-                >
-                  AI-Draw-Nexus
-                </a>
-              </p>
-            </div>
-            <div className="px-6 py-4 bg-gray-50 flex justify-end">
-              <button
-                onClick={() => setIsAnnouncementModalOpen(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                我知道了
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

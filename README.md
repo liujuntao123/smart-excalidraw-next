@@ -48,6 +48,12 @@ Read the English version: [README_EN.md](README_EN.md)
 
 ## 🚀 快速开始
 
+### 一键部署到 Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fliujuntao123%2Fsmart-excalidraw-next&project-name=smart-excalidraw-next&repository-name=smart-excalidraw-next&env=ACCESS_PASSWORD,SERVER_LLM_TYPE,SERVER_LLM_BASE_URL,SERVER_LLM_API_KEY,SERVER_LLM_MODEL&envDescription=Optional%20server-side%20LLM%20settings%20%28leave%20blank%20to%20use%20client%20keys%29)
+
+点击按钮后按引导完成部署。若不需要服务器端 LLM，可将环境变量留空，部署完成后在页面中配置自己的 API Key 即可。
+
 ### 方式一：使用访问密码
 
 如果服务器管理员已配置访问密码，你可以直接使用服务器端的 LLM 配置，无需自己提供 API Key：

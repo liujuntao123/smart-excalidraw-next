@@ -35,6 +35,12 @@ Now supports both Chinese and English interfaces, making it accessible to a glob
 
 ## 🚀 Quick Start
 
+### One-Click Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fliujuntao123%2Fsmart-excalidraw-next&project-name=smart-excalidraw-next&repository-name=smart-excalidraw-next&env=ACCESS_PASSWORD,SERVER_LLM_TYPE,SERVER_LLM_BASE_URL,SERVER_LLM_API_KEY,SERVER_LLM_MODEL&envDescription=Optional%20server-side%20LLM%20settings%20%28leave%20blank%20to%20use%20client%20keys%29)
+
+Follow the setup flow after clicking the button. If you don't need server-side LLM, leave the env vars empty and configure your API key in the UI after deployment.
+
 ### Option 1: Use Access Password
 
 If the server administrator has configured an access password, you can directly use the server-side LLM configuration without providing your own API Key:
